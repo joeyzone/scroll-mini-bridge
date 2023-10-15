@@ -2,25 +2,20 @@ import { ethers } from "ethers";
 // import { Provider, utils, types, Contract } from "zksync2-js";
 
 const ALCHEMY_SCROLL_URL = "https://sepolia-rpc.scroll.io/";
-const ALCHEMY_BASE_URL = "https://mainnet.base.org/";
 
 const scrollProvider = new ethers.JsonRpcProvider(ALCHEMY_SCROLL_URL);
-const baseProvider = new ethers.JsonRpcProvider(ALCHEMY_BASE_URL);
+const zysyncProvider = new ethers.WebSocketProvider(
+  `wss://testnet.era.zksync.dev/ws`
+);
 
 async function main() {
-  console.log(`Network: ${JSON.stringify(await baseProvider.getNetwork())}`);
   const scrollPoolAddress = "0x551197e6350936976DfFB66B2c3bb15DDB723250";
 
-  const basePoolAddress = "0xb4c0f77e759e1b9a750b3302aa81dc39263cd136";
+  const zysyncPoolAddress = "0x2B7Ef25c3D74F7164F477D387A93d1cDdD144031";
 
   const abi = [
     "event Approval(address indexed owner, address indexed spender, uint256 value)",
     "event Transfer(address indexed from, address indexed to, uint amount)",
-  ];
-
-  const abi2 = [
-    "event Approval(address indexed owner, address indexed spender, uint256 value)",
-    "event Transfer(address indexed from, address indexed to, uint256 value)",
   ];
 
   const contractScrollPool = new ethers.Contract(
@@ -29,10 +24,10 @@ async function main() {
     scrollProvider
   );
 
-  const contractbaselPool = new ethers.Contract(
-    basePoolAddress,
-    abi2,
-    baseProvider
+  const contractzySynclPool = new ethers.Contract(
+    zysyncPoolAddress,
+    abi,
+    zysyncProvider
   );
 
   // eth from scroll to base
@@ -40,13 +35,13 @@ async function main() {
   contractScrollPool.on("Transfer", (from, to, amount) => {
     console.log("contractScrollPool", from, to, amount);
 
-    //   contractbaselPool.crossChainTransferOut(chainId, from, to, amount);
+    //   contractzySynclPool.crossChainTransferOut(chainId, from, to, amount);
   });
 
-  contractbaselPool.on("Approval", (from, to, amount) => {
-    console.log("contractbaselPool", from, to, amount);
+  contractzySynclPool.on("Transfer", (event) => {
+    // optional filter parameters
 
-    //   contractbaselPool.crossChainTransferOut(chainId, from, to, amount);
+    console.log(1232313, event);
   });
 }
 
