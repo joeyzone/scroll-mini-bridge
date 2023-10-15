@@ -11,6 +11,9 @@ dependencies:
   hardhat:
     specifier: ^2.18.1
     version: registry.npmmirror.com/hardhat@2.18.1(ts-node@10.9.1)(typescript@5.0.4)
+  zksync2-js:
+    specifier: ^0.1.0
+    version: registry.npmmirror.com/zksync2-js@0.1.0(ethers@6.8.0)
 
 devDependencies:
   '@nomicfoundation/hardhat-network-helpers':
@@ -4601,3 +4604,14 @@ packages:
     name: yocto-queue
     version: 0.1.0
     engines: {node: '>=10'}
+
+  registry.npmmirror.com/zksync2-js@0.1.0(ethers@6.8.0):
+    resolution: {integrity: sha512-p3RGwbr/Cchtp4RAgdQLNQzjSOhvQvgpIPpyG7BAjXnOZF6q09Z/k/rXiqS9ovrv2t+HLHiHgyEJjc3Pqoy2UQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/zksync2-js/-/zksync2-js-0.1.0.tgz}
+    id: registry.npmmirror.com/zksync2-js/0.1.0
+    name: zksync2-js
+    version: 0.1.0
+    peerDependencies:
+      ethers: ^6.7.1
+    dependencies:
+      ethers: registry.npmmirror.com/ethers@6.8.0
+    dev: false
