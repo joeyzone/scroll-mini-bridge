@@ -51,52 +51,63 @@ async function main() {
     )
   );
 
-  // eth from scroll to zysync
+  // eth from scroll to sepolia
+
   contractScrollPool2.on(
     "CrossChainTransferIn",
     async (chainId, walletAddress, _tokenAddress, amount, _fees, event) => {
       console.log(
+        "scroll in:",
         event.log.transactionHash,
         chainId,
         ethers.ZeroAddress,
         walletAddress,
         amount
       );
-      await contractSeplPool.crossChainTransferOut(
-        event.log.transactionHash,
-        chainId,
-        ethers.ZeroAddress,
-        walletAddress,
-        amount
-      );
-      console.log("cross transfer success");
+      try {
+        const tx = await contractSeplPool.crossChainTransferOut(
+          event.log.transactionHash,
+          chainId,
+          ethers.ZeroAddress,
+          walletAddress,
+          amount
+        );
+        console.log(`cross transfer success ${tx.hash}`);
+      } catch (error) {
+        console.log("🚀 ~ file: scroll-sepolia.ts:77 ~ error:", error);
+      }
     }
   );
 
-  // eth from zysync to scroll
+  // eth from sepolia to scroll
   contractSepSockets.on(
     "CrossChainTransferIn",
     async (chainId, walletAddress, _tokenAddress, amount, _fees, event) => {
       console.log(
+        "sepolia in:",
         event.log.transactionHash,
         chainId,
         ethers.ZeroAddress,
         walletAddress,
         amount
       );
-      await contractScrollPool.crossChainTransferOut(
-        event.log.transactionHash,
-        chainId,
-        ethers.ZeroAddress,
-        walletAddress,
-        amount
-      );
-      console.log("cross transfer success");
+      try {
+        const tx = await contractScrollPool.crossChainTransferOut(
+          event.log.transactionHash,
+          chainId,
+          ethers.ZeroAddress,
+          walletAddress,
+          amount
+        );
+        console.log(`cross transfer success ${tx.hash}`);
+      } catch (error) {
+        console.log("🚀 ~ file: scroll-sepolia.ts:104 ~ error:", error);
+      }
     }
   );
 
   dealTransferIn(contractSeplPool, contractScrollPool);
-  //   dealTransferIn(contractScrollPool, contractSeplPool);
+  dealTransferIn(contractScrollPool, contractSeplPool);
 }
 
 async function dealTransferIn(poolIn: any, poolOut: any) {
