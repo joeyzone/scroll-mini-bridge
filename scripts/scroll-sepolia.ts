@@ -3,12 +3,15 @@ import "dotenv/config";
 import CrossChainBridge from "./CrossChainBridge.json";
 
 const ALCHEMY_SCROLL_URL = "https://sepolia-rpc.scroll.io/";
-// const ALCHEMY_ZYSYNC_URL = "https://testnet.era.zksync.dev";
 
 const scrollProvider = new ethers.JsonRpcProvider(ALCHEMY_SCROLL_URL);
 const sepProvider = new ethers.JsonRpcProvider(
   "https://eth-sepolia.g.alchemy.com/v2/Fnaj_O1Nd_eWSGJ4ah9_dSduk3-Zx_Kf"
 );
+
+const SEPOLIA_START_BLOCK = 4495825;
+
+const SCROLL_START_BLOCK = 1618057;
 
 const scrollWalllet = new ethers.Wallet(
   process.env.PRIVATE_KEY || "",
@@ -72,6 +75,7 @@ async function main() {
           walletAddress,
           amount
         );
+        await tx.wait();
         console.log(`cross transfer success ${tx.hash}`);
       } catch (error) {
         console.log("🚀 ~ file: scroll-sepolia.ts:77 ~ error:", error);
@@ -99,6 +103,7 @@ async function main() {
           walletAddress,
           amount
         );
+        await tx.wait();
         console.log(`cross transfer success ${tx.hash}`);
       } catch (error) {
         console.log("🚀 ~ file: scroll-sepolia.ts:104 ~ error:", error);
@@ -106,79 +111,95 @@ async function main() {
     }
   );
 
-  dealTransferIn(contractSeplPool, contractScrollPool);
-  dealTransferIn(contractScrollPool, contractSeplPool);
+  dealTransferIn(contractSeplPool, contractScrollPool, false);
+  dealTransferIn(contractScrollPool, contractSeplPool, true);
 }
 
-async function dealTransferIn(poolIn: any, poolOut: any) {
-  const block = await sepProvider.getBlockNumber();
-  console.log(
-    "🚀 ~ file: scroll-sepolia.ts:90 ~ dealTransferIn ~ block:",
-    block
-  );
+function delayedForEach(array: any[], callback: any, delay: number) {
+  let index = 0;
+
+  function next() {
+    if (index < array.length) {
+      callback(array[index], index, array);
+      index++;
+      setTimeout(next, delay);
+    }
+  }
+
+  next();
+}
+
+async function dealTransferIn(poolIn: any, poolOut: any, isScrollIn: boolean) {
+  const sepBlock = await sepProvider.getBlockNumber();
+  const scrollBlock = await scrollProvider.getBlockNumber();
+  //   console.log("🚀 Current block num: ", sepBlock, scrollBlock);
 
   const transferOutScrollEvents = await poolOut.queryFilter(
     "CrossChainTransferOut",
-    block - 500,
-    block
+    isScrollIn ? sepBlock - 1000 : scrollBlock - 1000,
+    isScrollIn ? sepBlock : scrollBlock
   );
 
   const transferInEvents = await poolIn.queryFilter(
     "CrossChainTransferIn",
-    block - 500,
-    block
-  );
-  console.log(
-    "🚀 ~ file: scroll-sepolia.ts:100 ~ dealTransferIn ~ transferInEvents:",
-    transferInEvents.length
+    isScrollIn ? scrollBlock - 1000 : sepBlock - 1000,
+    isScrollIn ? scrollBlock : sepBlock
   );
 
-  console.log("CrossChainTransferOut: ", transferOutScrollEvents.length);
+  console.log("🚀 transferInEvents Length:", transferInEvents.length);
 
-  transferInEvents.forEach(async (event: any) => {
-    console.log(
-      "sepolia transferIn: ",
-      event.transactionHash,
-      event?.args[1],
-      event?.args[2],
-      event?.args[3]
-    );
+  async function callback(event: any) {
+    // console.log(
+    //   "sepolia transferIn: ",
+    //   event.transactionHash,
+    //   event?.args[1],
+    //   event?.args[2],
+    //   event?.args[3]
+    // );
+    console.log(1232312);
     const eventIntxHash = event.transactionHash;
     let alreadyOut = false;
+
     transferOutScrollEvents.some((eventsOut: any) => {
       if (eventIntxHash === eventsOut.transactionHash) {
         return (alreadyOut = true);
       }
     });
+
     if (alreadyOut) {
       return;
     }
 
-    //    function crossChainTransferOut(
-    //     bytes32 originTxHash,
-    //     uint256 originChainId,
-    //     address tokenAddress,
-    //     address toWallet,
-    //     uint256 amount
-    // ) external onlyMessenger {
     console.log(
-      "args:",
+      "crossChainTransferOut args: ",
       event.transactionHash,
       event?.args[0],
       ethers.ZeroAddress,
       event?.args[2],
       event?.args[3]
     );
-    // await poolOut.crossChainTransferOut(
-    //   event.transactionHash,
-    //   event?.args[0],
-    //   ethers.ZeroAddress,
-    //   event?.args[2],
-    //   //   event?.args[3]
-    //   ethers.parseEther("0.001")
-    // );
-    // console.log("cross transfer success");
-  });
+    let tx;
+    try {
+      tx = await poolOut.crossChainTransferOut(
+        event.transactionHash,
+        event?.args[0],
+        ethers.ZeroAddress,
+        event?.args[2],
+        //   event?.args[3]
+        ethers.parseEther("0.001")
+      );
+
+      console.log(
+        `crossChainTransferOut From History Event Success: ${tx.hash}`
+      );
+    } catch (error) {
+      console.log(
+        "🚀 ~ file: scroll-sepolia.ts:173 ~ transferInEvents.forEach ~ error:",
+        error
+      );
+    }
+  }
+  delayedForEach(transferInEvents, callback, 15000);
 }
 
 main();
