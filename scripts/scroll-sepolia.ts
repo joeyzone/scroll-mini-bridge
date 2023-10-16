@@ -156,7 +156,6 @@ async function dealTransferIn(poolIn: any, poolOut: any, isScrollIn: boolean) {
     //   event?.args[2],
     //   event?.args[3]
     // );
-    console.log(1232312);
     const eventIntxHash = event.transactionHash;
     let alreadyOut = false;
 
