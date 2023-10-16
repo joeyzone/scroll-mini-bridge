@@ -37,12 +37,13 @@ async function main() {
     zysyncWallet
   );
 
-  contractSeplPool.crossChainTransferIn(
+  await contractSeplPool.crossChainTransferIn(
     534351,
     "0x0780cbe8293C6578Fd9C8E312d9915441D5bb883",
     ethers.parseEther("0.1"),
     { value: ethers.parseEther("0.1") }
   );
+  console.log("success");
 }
 
 main();

@@ -110,7 +110,7 @@ async function dealTransferIn(poolIn: any, poolOut: any) {
 
   console.log("CrossChainTransferOut: ", transferOutScrollEvents.length);
 
-  transferInEvents.forEach((event: any) => {
+  transferInEvents.forEach(async (event: any) => {
     console.log(
       "sepolia transferIn: ",
       event.transactionHash,
@@ -129,13 +129,30 @@ async function dealTransferIn(poolIn: any, poolOut: any) {
       return;
     }
 
-    poolOut.crossChainTransferOut(
+    //    function crossChainTransferOut(
+    //     bytes32 originTxHash,
+    //     uint256 originChainId,
+    //     address tokenAddress,
+    //     address toWallet,
+    //     uint256 amount
+    // ) external onlyMessenger {
+    console.log(
+      "args:",
       event.transactionHash,
       event?.args[0],
-      event?.args[1],
+      ethers.ZeroAddress,
       event?.args[2],
       event?.args[3]
     );
+    await poolOut.crossChainTransferOut(
+      event.transactionHash,
+      event?.args[0],
+      ethers.ZeroAddress,
+      event?.args[2],
+      //   event?.args[3]
+      ethers.parseEther("0.001")
+    );
+    console.log("cross transfer success");
   });
 }
 
