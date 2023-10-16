@@ -92,6 +92,12 @@ async function dealTransferIn(poolIn: any, poolOut: any) {
     block
   );
 
+  const transferOutScrollEvents = await poolOut.queryFilter(
+    "CrossChainTransferOut",
+    block - 500,
+    block
+  );
+
   const transferInEvents = await poolIn.queryFilter(
     "CrossChainTransferIn",
     block - 500,
@@ -100,12 +106,6 @@ async function dealTransferIn(poolIn: any, poolOut: any) {
   console.log(
     "🚀 ~ file: scroll-sepolia.ts:100 ~ dealTransferIn ~ transferInEvents:",
     transferInEvents.length
-  );
-
-  const transferOutScrollEvents = await poolOut.queryFilter(
-    "CrossChainTransferOut",
-    block - 500,
-    block
   );
 
   console.log("CrossChainTransferOut: ", transferOutScrollEvents.length);
