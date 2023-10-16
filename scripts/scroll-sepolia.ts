@@ -157,12 +157,9 @@ async function dealTransferIn(poolIn: any, poolOut: any, isScrollIn: boolean) {
     //   event?.args[3]
     // );
     const eventIntxHash = event.transactionHash;
-    let alreadyOut = false;
 
-    transferOutScrollEvents.some((eventsOut: any) => {
-      if (eventIntxHash === eventsOut.transactionHash) {
-        return (alreadyOut = true);
-      }
+    const alreadyOut = transferOutScrollEvents.some((eventsOut: any) => {
+      return eventIntxHash === eventsOut.args[0];
     });
 
     if (alreadyOut) {
