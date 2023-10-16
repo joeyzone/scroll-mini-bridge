@@ -37,11 +37,11 @@ async function main() {
     //   contractBasePool.crossChainTransferOut(chainId, from, to, amount);
   });
 
-  contractBasePool.on("Transfer", (from, to, amount) => {
-    console.log("base: ", from, to, amount);
+  //   contractBasePool.on("Transfer", (from, to, amount) => {
+  //     console.log("base: ", from, to, amount);
 
-    //   contractBasePool.crossChainTransferOut(chainId, from, to, amount);
-  });
+  //     //   contractBasePool.crossChainTransferOut(chainId, from, to, amount);
+  //   });
 }
 
 main();

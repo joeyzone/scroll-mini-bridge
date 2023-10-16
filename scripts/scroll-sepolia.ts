@@ -31,53 +31,67 @@ async function main() {
     scrollWalllet
   );
 
+  const contractScrollPool2 = new ethers.Contract(
+    scrollPoolAddress,
+    CrossChainBridge.abi,
+    scrollProvider
+  );
+
   const contractSeplPool = new ethers.Contract(
     sepPoolAddress,
     CrossChainBridge.abi,
     scrollWallet
   );
 
+  const contractSepSockets = new ethers.Contract(
+    sepPoolAddress,
+    CrossChainBridge.abi,
+    new ethers.WebSocketProvider(
+      "wss://eth-sepolia.g.alchemy.com/v2/Fnaj_O1Nd_eWSGJ4ah9_dSduk3-Zx_Kf"
+    )
+  );
+
   // eth from scroll to zysync
-  contractScrollPool.on(
+  contractScrollPool2.on(
     "CrossChainTransferIn",
-    (chainId, from, to, _tokenAddress, amount, _fees, event) => {
+    async (chainId, walletAddress, _tokenAddress, amount, _fees, event) => {
       console.log(
-        "🚀 ~ file: scroll-sepolia.ts:62 ~ main ~ CrossChainTransferIn:",
-        event.transactionHash,
+        event.log.transactionHash,
         chainId,
-        from,
-        to,
+        ethers.ZeroAddress,
+        walletAddress,
         amount
       );
-      //   contractSeplPool.crossChainTransferOut(
-      //     event.transactionHash,
-      //     chainId,
-      //     from,
-      //     to,
-      //     amount
-      //   );
+      await contractSeplPool.crossChainTransferOut(
+        event.log.transactionHash,
+        chainId,
+        ethers.ZeroAddress,
+        walletAddress,
+        amount
+      );
+      console.log("cross transfer success");
     }
   );
 
   // eth from zysync to scroll
-  contractSeplPool.on(
+  contractSepSockets.on(
     "CrossChainTransferIn",
-    (chainId, from, to, _tokenAddress, amount, _fees, event) => {
+    async (chainId, walletAddress, _tokenAddress, amount, _fees, event) => {
       console.log(
-        "🚀 ~ file: scroll-sepolia.ts:62 ~ main ~ CrossChainTransferIn:",
-        event.transactionHash,
+        event.log.transactionHash,
         chainId,
-        from,
-        to,
+        ethers.ZeroAddress,
+        walletAddress,
         amount
       );
-      //   contractScrollPool.crossChainTransferOut(
-      //     event.transactionHash,
-      //     chainId,
-      //     from,
-      //     to,
-      //     amount
-      //   );
+      await contractScrollPool.crossChainTransferOut(
+        event.log.transactionHash,
+        chainId,
+        ethers.ZeroAddress,
+        walletAddress,
+        amount
+      );
+      console.log("cross transfer success");
     }
   );
 
@@ -144,15 +158,15 @@ async function dealTransferIn(poolIn: any, poolOut: any) {
       event?.args[2],
       event?.args[3]
     );
-    await poolOut.crossChainTransferOut(
-      event.transactionHash,
-      event?.args[0],
-      ethers.ZeroAddress,
-      event?.args[2],
-      //   event?.args[3]
-      ethers.parseEther("0.001")
-    );
-    console.log("cross transfer success");
+    // await poolOut.crossChainTransferOut(
+    //   event.transactionHash,
+    //   event?.args[0],
+    //   ethers.ZeroAddress,
+    //   event?.args[2],
+    //   //   event?.args[3]
+    //   ethers.parseEther("0.001")
+    // );
+    // console.log("cross transfer success");
   });
 }
 
